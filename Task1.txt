@@ -1,0 +1,281 @@
+﻿Project structure of .net wep api:-
+📂 MyWebAPI
+
+│-- 📂 Controllers
+│   ├── ProductController.cs
+│   ├── UserController.cs
+
+│-- 📂 Models
+│   ├── Product.cs
+│   ├── User.cs
+
+│-- 📂 Data
+│   ├── AppDbContext.cs
+
+│-- 📂 Repositories
+│   ├── IProductRepository.cs
+│   ├── ProductRepository.cs
+
+│-- 📂 Services
+│   ├── IProductService.cs
+│   ├── ProductService.cs
+
+│-- 📂 DTOs
+│   ├── ProductDTO.cs
+
+│-- 📂 Middleware
+│   ├── ExceptionMiddleware.cs
+
+│-- 📂 Configurations
+│   ├── AppSettings.json
+
+│-- 📂 wwwroot
+
+│-- Program.cs
+
+│-- appsettings.json
+
+│-- MyWebAPI.csproj
+
+ 2. Explanation of Each Folder & File
+
+
+     📂 1. Controllers (Presentation Layer)
+          📍 Handles HTTP requests and routes them to services.
+           1)Each controller represents an API endpoint.
+           2)Calls services to perform business logic.
+
+     Example: Controllers/ProductController.cs
+
+        using Microsoft.AspNetCore.Mvc;
+        using MyWebAPI.Services;
+        using MyWebAPI.DTOs;
+
+        [Route("api/[controller]")]
+        [ApiController]
+        public class ProductController : ControllerBase
+        {
+            private readonly IProductService _productService;
+
+            public ProductController(IProductService productService)
+            {
+                _productService = productService;
+            }
+
+            [HttpGet("{id}")]
+            public IActionResult GetProduct(int id)
+            {
+                var product = _productService.GetProductById(id);
+                return product == null ? NotFound() : Ok(product);
+            }
+        }
+
+  📂 2. Models (Domain Layer)
+     📍 Defines database entities (Core Business Models).
+      1) Represents tables in the database when using Entity Framework Core (EF Core).
+
+        Example: Models/Product.cs
+
+
+        public class Product
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public decimal Price { get; set; }
+        }
+
+
+  📂 3. Data (Database Context)
+     📍 Handles database operations using EF Core.
+      1) AppDbContext.cs manages database connections.
+
+        Example: Data/AppDbContext.cs
+
+
+        using Microsoft.EntityFrameworkCore;
+        using MyWebAPI.Models;
+
+        public class AppDbContext : DbContext
+        {
+            public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+            public DbSet<Product> Products { get; set; }
+        }
+
+
+  📂 4. Repositories (Data Access Layer)
+     📍 Handles direct database operations (Repository Pattern).
+       1)Interfaces (IProductRepository.cs) define how data should be accessed.
+       2)Implementations (ProductRepository.cs) interact with the database.
+
+    Example: Repositories/IProductRepository.cs (Interface)
+
+
+        using MyWebAPI.Models;
+
+        public interface IProductRepository
+        {
+            Product GetById(int id);
+        }
+
+   Example: Repositories/ProductRepository.cs (Implementation)
+
+        using MyWebAPI.Models;
+
+        public class ProductRepository : IProductRepository
+        {
+            private readonly AppDbContext _context;
+
+            public ProductRepository(AppDbContext context)
+            {
+                _context = context;
+            }
+
+            public Product GetById(int id)
+            {
+                return _context.Products.Find(id);
+            }
+        }
+
+
+  📂 5. Services (Business Logic Layer)
+
+        📍 Handles business logic and calls repositories.
+         1)Interfaces (IProductService.cs) define business rules.
+         2)Implementations (ProductService.cs) implement those rules.
+
+            Example: Services/IProductService.cs
+
+                using MyWebAPI.DTOs;
+
+                public interface IProductService
+                {
+                    ProductDTO GetProductById(int id);
+                }
+
+           Example: Services/ProductService.cs
+
+
+                using MyWebAPI.DTOs;
+                using MyWebAPI.Repositories;
+
+                public class ProductService : IProductService
+                {
+                    private readonly IProductRepository _productRepository;
+
+                    public ProductService(IProductRepository productRepository)
+                    {
+                        _productRepository = productRepository;
+                    }
+
+                    public ProductDTO GetProductById(int id)
+                    {
+                        var product = _productRepository.GetById(id);
+                        return product == null ? null : new ProductDTO { Id = product.Id, Name = product.Name, Price = product.Price };
+                    }
+                }
+
+     📂 6. DTOs (Data Transfer Objects)
+
+       📍 Transfers data between layers (API <-> Services).
+         1)Prevents exposing database models directly.
+         2)Contains only necessary fields for the API response.
+
+        Example: DTOs/ProductDTO.cs
+
+        
+        public class ProductDTO
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public decimal Price { get; set; }
+        }
+
+     📂 7. Middleware (Custom Middleware)
+
+        📍 Handles global exception handling, logging, and request processing.
+
+        Example: Middleware/ExceptionMiddleware.cs
+
+
+        using Microsoft.AspNetCore.Http;
+        using System.Net;
+        using System.Text.Json;
+
+        public class ExceptionMiddleware
+        {
+            private readonly RequestDelegate _next;
+
+            public ExceptionMiddleware(RequestDelegate next)
+            {
+                _next = next;
+            }
+
+            public async Task InvokeAsync(HttpContext context)
+            {
+                try
+                {
+                    await _next(context);
+                }
+                catch (Exception ex)
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    var response = new { message = "An error occurred", error = ex.Message };
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                }
+            }
+        }
+
+       📂 8. Configurations (Application Settings)
+        📍 Stores application-level settings and configurations.
+
+        AppSettings.json stores database connection strings and other configs.
+       📂 9. wwwroot (Static Files)
+        📍 Contains static files like images, CSS, and JavaScript (if applicable).
+
+        📌 3. Key Configuration in Program.cs
+        📍 Registers services, repositories, and middleware.
+
+
+                using Microsoft.EntityFrameworkCore;
+                using MyWebAPI.Data;
+                using MyWebAPI.Repositories;
+                using MyWebAPI.Services;
+                using MyWebAPI.Middleware;
+
+                var builder = WebApplication.CreateBuilder(args);
+
+                // ✅ Register Database Context
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+                // ✅ Register Repositories and Services
+                builder.Services.AddScoped<IProductRepository, ProductRepository>();
+                builder.Services.AddScoped<IProductService, ProductService>();
+
+                builder.Services.AddControllers();
+                builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddSwaggerGen();
+
+                var app = builder.Build();
+
+                // ✅ Apply Middleware
+                app.UseMiddleware<ExceptionMiddleware>();
+                app.UseHttpsRedirection();
+                app.UseAuthorization();
+                app.MapControllers();
+
+                app.Run();
+                📌 4. Running and Testing the API
+       
+
+
+               dotnet run
+                2️⃣ Test API in Postman or Swagger:
+                GET http://localhost:5000/api/product/1
+
+
+
+
+
+ 
