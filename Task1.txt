@@ -275,7 +275,64 @@
                 GET http://localhost:5000/api/product/1
 
 
-
+# Migrations in .NET
+	-----------------------------------------------------------------------------------
+		-> A Part of Entity-Framework Core
+		-> Helps in version-controlling database schema changes
+		-> Generates C# Classes that define how to update or revert changes to database schema.
+ 
+		-> Key Features : 
+			----------------
+				1. Tracks changes in DbContext and Entity Models.
+				2. Generates SQL Scripts to update the database
+				3. Supports downgrading and upgrading schema versions.
+				4. Helps automate schema synchronization in different environments.
+ 
+		-> In Order to Set Up Migrations, Install Entity Framework Core Tools
+ 
+		-> Creating and Applying Migrations
+			------------------------------------
+				1. Define your Model and DbContext
+					--------------------------------
+					-> Define Your Entity Class
+							public class Product
+							{
+								public int Id { get; set; }
+								public string Name { get; set; }
+								public decimal Price { get; set; }
+							}
+ 
+				2. Add the First Migration
+					-> Add-Migration InitialCreate
+							* This creates a Migrations folder containing:
+									yyyyMMddHHmmss_InitialCreate.cs: Defines the schema changes.
+									AppDbContextModelSnapshot.cs: Represents the latest schema state.
+ 
+				
+				3. Apply the Migration to the Database
+					-> Update-Database  :- This Applies the Migration and Creates Table in the Database
+ 
+				4. Adding New Changes
+					-> Whenever you modify your entity models, generates a new migration
+ 
+				5. Rolling Back to Previous Migration
+					-> If a Migration has already been applied and you want to rollback 
+							-> Command : Update-Database name_of_migration_message
+ 
+					-> Removing the last Migration
+							-> Remove-Migration
+ 
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+# Seeding in .NET Core
+	--------------------------------
+	1. Database Seeding
+		------------------
+			-> Process of pre-populating the database with initial or test data.
+			-> Useful in Scenarios like :
+					* Creating default users, roles or categories
+					* Ensuring Test Environments have consistent data.
+					* Setting up reference tables
+					* Simplifying development without requiring manual data entry.					
 
 
  
