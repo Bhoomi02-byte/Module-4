@@ -1,4 +1,5 @@
-﻿using Module_4.Models.Entities;
+﻿using Module_4.DTO;
+using Module_4.Models.Entities;
 
 namespace Module_4.Services
 {
@@ -7,7 +8,7 @@ namespace Module_4.Services
         List<Employee> GetAllEmployees();
         Employee GetEmployeeById(int id);
         void AddEmployee(Employee employee);
-        void UpdateEmployee(Employee employee);
+        void UpdateEmployee(int id, UpdateEmployeedto updateEmployeeDto);
         void DeleteEmployee(int id);
     }
 }

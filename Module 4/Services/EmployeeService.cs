@@ -1,5 +1,7 @@
 ﻿using Module_4.Data;
+using Module_4.DTO;
 using Module_4.Models.Entities;
+
 
 namespace Module_4.Services
 {
@@ -28,8 +30,19 @@ namespace Module_4.Services
             _context.SaveChanges();
         }
 
-        public void UpdateEmployee(Employee employee)
+        public void UpdateEmployee(int id, UpdateEmployeedto updateEmployeeDto)
         {
+            var employee = _context.Employees.Find(id);
+            if (employee == null)
+            {
+                throw new Exception("Employee not found");
+            }
+
+            employee.Name = updateEmployeeDto.Name;
+            employee.Email = updateEmployeeDto.Email;
+            employee.Phone = updateEmployeeDto.Phone;
+            employee.Salary = updateEmployeeDto.Salary;
+
             _context.Employees.Update(employee);
             _context.SaveChanges();
         }

@@ -42,18 +42,25 @@ namespace Module_4.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateEmployee(int id, Employee employee)
+        public IActionResult UpdateEmployee(int id, [FromBody] UpdateEmployeedto updateEmployeeDto)
         {
-            if (id != employee.Id) return BadRequest();
-            _employeeService.UpdateEmployee(employee);
-            return NoContent();
+            try
+            {
+                _employeeService.UpdateEmployee(id, updateEmployeeDto);
+                return Ok(new { message = "Employee updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteEmployee(int id)
         {
             _employeeService.DeleteEmployee(id);
-            return NoContent();
+
+            return Ok(new { message= "Employee deleted sucessfully "});
         }
     }
 }

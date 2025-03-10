@@ -285,7 +285,7 @@
 			----------------
 				1. Tracks changes in DbContext and Entity Models.
 				2. Generates SQL Scripts to update the database
-				3. Supports downgrading and upgrading schema versions.
+				3. Supports downgrading and upgrading schema versions. 
 				4. Helps automate schema synchronization in different environments.
  
 		-> In Order to Set Up Migrations, Install Entity Framework Core Tools
