@@ -1,6 +1,9 @@
 ﻿using Module_4.Data;
 using Module_4.DTO;
 using Module_4.Models.Entities;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
 
 
 namespace Module_4.Services
@@ -14,25 +17,25 @@ namespace Module_4.Services
             _context = context;
         }
 
-        public List<Employee> GetAllEmployees()
+        public async Task<List<Employee>> GetAllEmployees()
         {
-            return _context.Employees.ToList();
+            return await _context.Employees.ToListAsync();
         }
 
-        public Employee GetEmployeeById(int id)
+        public async Task<Employee> GetEmployeeById(int id)
         {
-            return _context.Employees.Find(id);
+            return await _context.Employees.FindAsync(id);
         }
 
-        public void AddEmployee(Employee employee)
+        public async Task AddEmployee(Employee employee)
         {
-            _context.Employees.Add(employee);
-            _context.SaveChanges();
+           await  _context.Employees.AddAsync(employee);
+          await  _context.SaveChangesAsync();
         }
 
-        public void UpdateEmployee(int id, UpdateEmployeedto updateEmployeeDto)
+        public async Task UpdateEmployee(int id, UpdateEmployeedto updateEmployeeDto)
         {
-            var employee = _context.Employees.Find(id);
+            var employee = await _context.Employees.FindAsync(id);
             if (employee == null)
             {
                 throw new Exception("Employee not found");
@@ -44,16 +47,16 @@ namespace Module_4.Services
             employee.Salary = updateEmployeeDto.Salary;
 
             _context.Employees.Update(employee);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteEmployee(int id)
+        public async Task DeleteEmployee(int id)
         {
             var employee = _context.Employees.Find(id);
             if (employee != null)
             {
                 _context.Employees.Remove(employee);
-                _context.SaveChanges();
+              await  _context.SaveChangesAsync();
             }
         }
     }

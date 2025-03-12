@@ -10,43 +10,44 @@ namespace Module_4.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesController : ControllerBase
+    public class employeesController : ControllerBase
     {
 
         private readonly IEmployeeService _employeeService;
 
-        public EmployeesController(IEmployeeService employeeService)
+        public employeesController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
         }
 
-        [HttpGet]
-        public ActionResult<List<Employee>> GetEmployees()
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetEmployees()
         {
-            return Ok(_employeeService.GetAllEmployees());
+            var employees = await _employeeService.GetAllEmployees();
+            return Ok(employees);
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Employee> GetEmployee(int id)
+        [HttpGet("get-details/{id}")]
+        public async Task<IActionResult> GetEmployee(int id)
         {
-            var employee = _employeeService.GetEmployeeById(id);
+            var employee = await _employeeService.GetEmployeeById(id);
             if (employee == null) return NotFound();
             return Ok(employee);
         }
 
-        [HttpPost]
-        public IActionResult AddEmployee(Employee employee)
+        [HttpPost("add")]
+        public async Task<IActionResult> AddEmployees(Employee employee)
         {
-            _employeeService.AddEmployee(employee);
+           await _employeeService.AddEmployee(employee);
             return CreatedAtAction(nameof(GetEmployee), new { id = employee.Id }, employee);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateEmployee(int id, [FromBody] UpdateEmployeedto updateEmployeeDto)
+        [HttpPut("update/{id}")]
+        public async Task< IActionResult> UpdateEmployee(int id, [FromBody] UpdateEmployeedto updateEmployeeDto)
         {
             try
             {
-                _employeeService.UpdateEmployee(id, updateEmployeeDto);
+               await _employeeService.UpdateEmployee(id, updateEmployeeDto);
                 return Ok(new { message = "Employee updated successfully" });
             }
             catch (Exception ex)
@@ -55,12 +56,19 @@ namespace Module_4.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteEmployee(int id)
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteEmployees(int id)
         {
-            _employeeService.DeleteEmployee(id);
+            try
+            {
+                await _employeeService.DeleteEmployee(id);
 
-            return Ok(new { message= "Employee deleted sucessfully "});
+                return Ok(new { message = "Employee deleted sucessfully " });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
     }
 }

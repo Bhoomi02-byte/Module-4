@@ -5,10 +5,10 @@ namespace Module_4.Services
 {
     public interface IEmployeeService
     {
-        List<Employee> GetAllEmployees();
-        Employee GetEmployeeById(int id);
-        void AddEmployee(Employee employee);
-        void UpdateEmployee(int id, UpdateEmployeedto updateEmployeeDto);
-        void DeleteEmployee(int id);
+        Task<List<Employee>> GetAllEmployees();
+        Task<Employee> GetEmployeeById(int id);
+        Task AddEmployee(Employee employee);
+        Task UpdateEmployee(int id, UpdateEmployeedto updateEmployeeDto);
+        Task DeleteEmployee(int id);
     }
 }
